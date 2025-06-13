@@ -1,0 +1,144 @@
+-- Criação da Database
+DROP DATABASE IF EXISTS TriathlonDB;
+CREATE DATABASE TriathlonDB;
+USE TriathlonDB;
+
+-- Tabela Atletas
+CREATE TABLE Atletas (
+  Id INT PRIMARY KEY AUTO_INCREMENT,
+  Nome VARCHAR(100) NOT NULL,
+  DataNascimento DATE NOT NULL,
+  Pais VARCHAR(50) NOT NULL
+);
+
+-- Tabela Competicoes
+CREATE TABLE Competicoes (
+  Id INT PRIMARY KEY AUTO_INCREMENT,
+  Nome VARCHAR(100) NOT NULL,
+  Data DATE NOT NULL,
+  Local VARCHAR(100) NOT NULL
+);
+
+-- Tabela Resultados
+CREATE TABLE Resultados (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    AtletaID INT NOT NULL,
+    CompeticaoID INT NOT NULL,
+    Tempo TIME NOT NULL,
+    Posicao INT NOT NULL,
+    FOREIGN KEY (AtletaID) REFERENCES Atletas(Id),
+    FOREIGN KEY (CompeticaoID) REFERENCES Competicoes(Id)
+);
+
+
+INSERT INTO Atletas (Id, Nome, DataNascimento, Pais) VALUES
+(1, 'João Silva', '1990-05-15', 'Brasil'),
+(2, 'Maria Oliveira', '1988-08-22', 'Portugal'),
+(3, 'Carlos Souza', '1992-03-10', 'Brasil'),
+(4, 'Pedro Santos', '1985-12-05', 'Argentina');
+
+INSERT INTO Competicoes (Id, Nome, Data, Local) VALUES
+(1, 'Triathlon Rio 2025', '2025-01-15', 'Rio de Janeiro'),
+(2, 'Triathlon Lisboa 2025', '2025-02-20', 'Lisboa'),
+(3, 'Triathlon Madri', '2025-03-25', 'Madri');
+
+INSERT INTO Resultados (Id, AtletaID, CompeticaoID, Tempo, Posicao) VALUES
+(1, 1, 1, '02:15:30', 1),
+(2, 2, 1, '02:20:45', 2),
+(3, 3, 1, '02:25:50', 3),
+(4, 4, 2, '02:30:00', 1),
+(6, 1, 3, '02:40:20', 1),
+(7, 2, 3, '02:45:25', 2),
+(8, 3, 3, '02:50:30', 3);
+
+
+-- CONSULTAS
+
+SELECT Nome, Pais FROM Atletas;
+
+SELECT Nome, Pais FROM Atletas
+WHERE Pais = 'Brasil';
+
+SELECT a.Nome, r.Tempo, r.Posicao
+FROM Resultados r
+JOIN Atletas a ON r.AtletaID = a.Id
+JOIN Competicoes c ON r.CompeticaoID = c.Id
+WHERE c.Nome = 'Triathlon Rio 2025'
+ORDER BY r.Posicao ASC;
+
+SELECT SEC_TO_TIME(AVG(TIME_TO_SEC(Tempo))) AS TempoMedio
+FROM Resultados r
+JOIN Competicoes c ON r.CompeticaoID = c.Id
+WHERE c.Nome = 'Triathlon Lisboa 2025';
+
+SELECT a.Nome, COUNT(DISTINCT r.CompeticaoID) AS NumeroCompeticiones
+FROM Atletas a
+LEFT JOIN Resultados r ON a.Id = r.AtletaID
+GROUP BY a.Id, a.Nome;
+
+SELECT a.Nome, COUNT(DISTINCT r.CompeticaoID) AS Competiciones
+FROM Atletas a
+JOIN Resultados r ON a.Id = r.AtletaID
+GROUP BY a.Id, a.Nome
+HAVING COUNT(DISTINCT r.CompeticaoID) > 1;
+
+
+JAVA
+
+MAIN CLASS
+
+import java.util.Scanner;
+
+public class Principal {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Loja loja = new Loja();
+
+        System.out.print("Digite a razão social da loja: ");
+        String razaoSocial = scanner.nextLine();
+
+        System.out.print("Digite o CPF do cliente: ");
+        String cpfCliente = scanner.nextLine();
+
+        System.out.print("Digite o valor da compra: ");
+        double valorCompra = scanner.nextDouble();
+
+        System.out.print("Digite a quantidade de itens comprados: ");
+        double qtdItensComp = scanner.nextDouble();
+
+        loja.inserirDadosLoja(razaoSocial, cpfCliente, valorCompra, qtdItensComp);
+        System.out.println(loja.mostrarDadosLoja());
+
+        scanner.close();
+    }
+}
+
+
+LOJA CLASS
+
+public class Loja {
+    private String razaoSocial;
+    private String cpfCliente;
+    private double valorCompra;
+    private double qtdItensComp;
+    private double valorTotalCompra;
+
+    public void inserirDadosLoja(String razaoSocial, String cpfCliente, double valorCompra, double qtdItensComp) {
+        this.razaoSocial = razaoSocial;
+        this.cpfCliente = cpfCliente;
+        this.valorCompra = valorCompra;
+        this.qtdItensComp = qtdItensComp;
+        calcularCompraLoja();
+    }
+
+    private void calcularCompraLoja() {
+        this.valorTotalCompra = valorCompra * qtdItensComp;
+    }
+
+    public String mostrarDadosLoja() {
+        return "Razão Social: " + razaoSocial + "\nCPF do Cliente: " + cpfCliente +
+                "\nValor da Compra: " + valorCompra + "\nQuantidade de Itens: " + qtdItensComp +
+                "\nValor Total da Compra: " + valorTotalCompra;
+    }
+}
+
